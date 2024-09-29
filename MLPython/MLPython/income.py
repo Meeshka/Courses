@@ -22,7 +22,7 @@ if __name__ == '__main__':
     regressor = sktree.DecisionTreeRegressor(random_state=1234)
     trained.Model = regressor.fit(trained.X_tr, trained.Y_tr)
     #print(f"Prediction score {trained.Model.score(trained.X_test, trained.Y_test)}")
-    y_test_predicted = trained.Model.predict(trained.X_test)
+    #y_test_predicted = trained.Model.predict(trained.X_test)
     #print(f"Average prediction errors: {mean_absolute_error(trained.Y_test, y_test_predicted)}")
     #trained.show_tree((15,15),True)
     #trained.show_features()
@@ -35,6 +35,15 @@ if __name__ == '__main__':
     best_alpha = ccp_a[ix]
     regressor = sktree.DecisionTreeRegressor(random_state=1234, ccp_alpha=best_alpha)
     trained.Model = regressor.fit(trained.X_tr, trained.Y_tr)
+    print(f"Model score: {trained.Model.score(trained.X_tr, trained.Y_tr)}")
     print(f"Prediction score {trained.Model.score(trained.X_test, trained.Y_test)}")
+    #trained.show_tree((15,15),True)
+    y_test_predicted = trained.Model.predict(trained.X_test)
+    y_test_real = list(trained.Y_test['Salary'])
+    print(y_test_predicted)
+    print(y_test_real)
+    plt.plot(range(1,13,1), y_test_real, marker='^')
+    plt.plot(range(1,13,1), y_test_predicted, marker='o')
+    plt.show()
 
 
