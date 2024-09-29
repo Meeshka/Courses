@@ -1,0 +1,8 @@
+{
+  "col_x": ["Age", "Education"],
+  "col_y": ["Salary"],
+  "train_size": 0.6,
+  "random_state": 1234,
+  "stratify_ax": ["Age", "Education"],
+  "stratify_col": "Education"
+}
