@@ -97,3 +97,18 @@ if __name__ == "__main__":
     #rint(f"Multiplied dimensions {mult_tensor.ndim}")
 
     tensor_ones = torch.ones(4, 3, 2, dtype=torch.int32)
+    tensor_rand = torch.floor(torch.rand(3, 2)*10+1).to(torch.int32)
+    tensor9 = tensor_ones * tensor_rand
+    print(f"Ones tensor: {tensor_ones}")
+    print(f"Random tensor: {tensor_rand}")
+    print(f"Broadcast tensor: {tensor9}\n")
+
+    tensor_rand = torch.floor(torch.rand(3, 1)*10+1).to(torch.int32)
+    tensor10 = tensor_ones * tensor_rand
+    print(f"Random tensor: {tensor_rand}")
+    print(f"Broadcast tensor: {tensor10}")
+
+    tensor_rand = torch.floor(torch.rand(1, 2)*10+1).to(torch.int32)
+    tensor11 = tensor_ones * tensor_rand
+    print(f"Random tensor: {tensor_rand}")
+    print(f"Broadcast tensor: {tensor11}")
