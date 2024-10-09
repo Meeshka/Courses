@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def multiply_tensors(*args):
     res_t = 0
     for arg in args:
@@ -9,7 +10,8 @@ def multiply_tensors(*args):
             if not torch.is_tensor(res_t):
                 res_t = arg
             else:
-                res_t = res_t * arg
+                if arg.size() == res_t.size():
+                    res_t = res_t * arg
     return res_t
 
 
@@ -85,6 +87,13 @@ if __name__ == "__main__":
     #plt.plot(pi_spased_cos, label="Cos")
     #plt.show()
 
-    tensor7 = torch.tensor([2,4])
-    tensor8 = torch.tensor([1,4])
-    print(f"Multiplication 1 result: ")
+    #tensor7 = torch.tensor([[[2, 4, 3], [5, 7, 6], [1, 1, 1]],
+    #                        [[1, 1, 1], [1, 1, 1], [1, 1, 1]]])
+    #tensor8 = torch.tensor([[[1, 4, 1], [1, 1, 2], [0, 1, 0]],
+    #                        [[0, 0, 0], [0, 0, 0], [0, 0, 0]]])
+    #mult_tensor = multiply_tensors(tensor7, tensor8)
+    #print(f"Multiplication 1 result: {mult_tensor}")
+    #print(f"Multiplied shape {mult_tensor.shape}")
+    #rint(f"Multiplied dimensions {mult_tensor.ndim}")
+
+    tensor_ones = torch.ones(4, 3, 2, dtype=torch.int32)
