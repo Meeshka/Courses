@@ -1,42 +1,62 @@
 import cv2
 import mediapipe as mp
 
-# Initialize MediaPipe Holistic and OpenCV
-mp_holistic = mp.solutions.holistic
+# Initialize MediaPipe Pose solution
+mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
+pose = mp_pose.Pose()
 
-# Set up holistic model
-holistic = mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+# Load the image
+image = cv2.imread('lying_body.jpg')
+image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-# Capture video from the webcam
-cap = cv2.VideoCapture(0)
+# Perform pose detection
+results = pose.process(image_rgb)
 
-while cap.isOpened():
-    ret, frame = cap.read()
-    if not ret:
-        break
+# Define anatomical skeleton connections (bones)
+skeleton_connections = [
+    (mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_ELBOW),
+    (mp_pose.PoseLandmark.LEFT_ELBOW, mp_pose.PoseLandmark.LEFT_WRIST),
+    (mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_ELBOW),
+    (mp_pose.PoseLandmark.RIGHT_ELBOW, mp_pose.PoseLandmark.RIGHT_WRIST),
+    (mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.RIGHT_SHOULDER),  # Collarbone
+    (mp_pose.PoseLandmark.LEFT_HIP, mp_pose.PoseLandmark.RIGHT_HIP),  # Hip
+    (mp_pose.PoseLandmark.LEFT_HIP, mp_pose.PoseLandmark.LEFT_KNEE),
+    (mp_pose.PoseLandmark.LEFT_KNEE, mp_pose.PoseLandmark.LEFT_ANKLE),
+    (mp_pose.PoseLandmark.RIGHT_HIP, mp_pose.PoseLandmark.RIGHT_KNEE),
+    (mp_pose.PoseLandmark.RIGHT_KNEE, mp_pose.PoseLandmark.RIGHT_ANKLE),
+    (mp_pose.PoseLandmark.LEFT_SHOULDER, mp_pose.PoseLandmark.LEFT_HIP),
+    (mp_pose.PoseLandmark.RIGHT_SHOULDER, mp_pose.PoseLandmark.RIGHT_HIP)
+]
 
-    # Convert the frame to RGB as MediaPipe processes RGB images
-    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    result = holistic.process(frame_rgb)
+# Draw the skeleton on the image
+if results.pose_landmarks:
+    for connection in skeleton_connections:
+        start = results.pose_landmarks.landmark[connection[0]]
+        end = results.pose_landmarks.landmark[connection[1]]
 
-    # Draw the full-body skeleton
-    if result.pose_landmarks:
-        mp_drawing.draw_landmarks(
-            frame,
-            result.pose_landmarks,
-            mp_holistic.POSE_CONNECTIONS,
-            mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2),
-            mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=2)
-        )
+        # Convert normalized coordinates to pixel values
+        h, w, _ = image.shape
+        start_point = (int(start.x * w), int(start.y * h))
+        end_point = (int(end.x * w), int(end.y * h))
 
-    # Display the frame with the skeleton overlay
-    cv2.imshow('Body Skeleton Tracking', frame)
+        # Draw the line for bones
+        cv2.line(image, start_point, end_point, (255, 0, 0), 2)  # Red color for bones
 
-    # Exit the loop when 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    # Draw joints as circles
+    for landmark in results.pose_landmarks.landmark:
+        x, y = int(landmark.x * w), int(landmark.y * h)
+        cv2.circle(image, (x, y), 5, (0, 255, 0), -1)  # Green color for joints
 
-# Release resources
-cap.release()
+# Resize the image to fit the screen size
+screen_width = 1024  # Example screen width
+screen_height = 683  # Example screen height
+resized_image = cv2.resize(image, (screen_width, screen_height))
+
+# Display the result
+cv2.imshow('Medical Skeleton Image', resized_image)
+cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+# Optionally, save the resized image
+cv2.imwrite('skeleton_image_medical_resized.jpg', resized_image)
