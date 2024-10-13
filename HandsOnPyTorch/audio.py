@@ -9,6 +9,7 @@ import requests
 import torch
 import torchaudio
 import ssl
+import pygame
 
 
 if __name__ == "__main__":
@@ -39,4 +40,11 @@ if __name__ == "__main__":
     model = bundle.get_model().to(device)
     print(model.__class__)
 
-    IPython.display.Audio(SPEECH_FILE)
+    #IPython.display.Audio(SPEECH_FILE)
+
+    pygame.mixer.init()
+    pygame.mixer.music.load(SPEECH_FILE)
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy():
+        pygame.time.Clock().tick(10)
+
