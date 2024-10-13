@@ -120,7 +120,7 @@ if __name__ == "__main__":
     #speech_file, bundle = get_audio()
     speech_file, bundle = get_audio_from_text("Какая-то Китайская серая птица", device)
 
-    #play_audio(speech_file)
+    play_audio(speech_file)
 
     features, model = features_audio(bundle, speech_file)
 
