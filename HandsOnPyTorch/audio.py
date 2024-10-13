@@ -2,15 +2,16 @@
 
 import os
 
-import IPython
 import matplotlib
 import matplotlib.pyplot as plt
 import requests
 import torch
+from transformers import pipeline
+import numpy as np
 import torchaudio
-import ssl
 import pygame
 from CTCDecoder import GreedyCTCDecoder
+import soundfile as sf
 
 
 def get_audio():
@@ -25,6 +26,43 @@ def get_audio():
     bundle = torchaudio.pipelines.WAV2VEC2_ASR_BASE_960H
     print("Sample Rate:", bundle.sample_rate)
     print("Labels:", bundle.get_labels())
+
+    return SPEECH_FILE, bundle
+
+def get_audio_from_text(speech_text, device):
+    tts_pipeline = pipeline("text-to-speech", model="facebook/mms-tts-rus", device=device)
+    speech = tts_pipeline(speech_text)
+
+    model_config = tts_pipeline.model.config
+    sample_rate = model_config.sampling_rate if hasattr(model_config, 'sampling_rate') else None
+    if sample_rate is not None:
+        print("Sample Rate from model config:", sample_rate)
+    else:
+        print("Sample Rate is not available in the model config.")
+
+    if "audio" in speech:
+        print(speech)
+        audio = speech["audio"]  # Adjust this based on the output format
+    else:
+        raise KeyError("No 'audio' key found in the pipeline output.")
+
+    # Convert audio data to a NumPy array if needed
+    audio_np = np.array(audio)
+
+    # Ensure the audio is in the correct shape
+    if audio_np.ndim == 1:  # If it's mono
+        audio_np = audio_np[np.newaxis, :]  # Add a new axis for the channel
+
+    SPEECH_FILE = "_assets/speech.wav"
+
+    # Save the audio to a .wav file
+    bundle = torchaudio.pipelines.WAV2VEC2_ASR_BASE_960H
+    print("Sample Rate:", bundle.sample_rate)
+    print("Labels:", bundle.get_labels())
+
+    #sf.write(SPEECH_FILE, audio, samplerate=sample_rate)
+    sf.write(SPEECH_FILE, audio_np.T, samplerate=bundle.sample_rate)
+
 
     return SPEECH_FILE, bundle
 
@@ -79,7 +117,8 @@ if __name__ == "__main__":
     print(torchaudio.__version__)
     print(device)
 
-    speech_file, bundle = get_audio()
+    #speech_file, bundle = get_audio()
+    speech_file, bundle = get_audio_from_text("Какая-то Китайская серая птица", device)
 
     #play_audio(speech_file)
 
@@ -94,7 +133,13 @@ if __name__ == "__main__":
 
     #visualize_emission(emission)
 
-    decoder = GreedyCTCDecoder(labels=bundle.get_labels())
+    russian_labels = [
+        "а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м",
+        "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ",
+        "ъ", "ы", "ь", "э", "ю", "я", " "
+    ]
+    blank_index = russian_labels.index(" ")
+    decoder = GreedyCTCDecoder(labels=russian_labels, blank=blank_index)
     transcript = decoder(emission[0])
     print(transcript)
     play_audio(speech_file)
