@@ -54,4 +54,4 @@ if __name__ == "__main__":
         ax.imshow(np.squeeze(images[i]), cmap='gray')
         ax.set_title(labels[i].item())
         figure.tight_layout()
-    plt.show()
+    #plt.show()
