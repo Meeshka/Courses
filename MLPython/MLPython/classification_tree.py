@@ -74,9 +74,9 @@ def seventh(model):
 
 def eigth(model):
     grid = {
-        'max_depth': [2, 3, 4, 5],
+        'max_depth': [2,3,4, 5],
         'min_samples_split': [2, 3, 4, 5],
-        'min_samples_leaf': [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        'min_samples_leaf': [1,2,3,4,5,6, 7, 8, 9]
     }
     classifier = sktree.DecisionTreeClassifier(random_state=1234)
     gcv = GridSearchCV(estimator=classifier, param_grid=grid)

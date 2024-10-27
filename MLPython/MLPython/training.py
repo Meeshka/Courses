@@ -2,16 +2,15 @@ import json
 import os
 import pandas as pd
 
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn import tree as sktree
 
 
 class Training():
 
-    def __init__(self, data, filename):
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), filename), "r") as json_file:
+    def __init__(self, data):
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"config.json"), "r") as json_file:
             configuration = json.load(json_file)
 
         self.data = data
@@ -40,42 +39,6 @@ class Training():
             sns.scatterplot(data=self.data, x=x, y=y, hue=hue, style=hue, markers=markers, s=150)
         plt.legend(bbox_to_anchor=(1.02, 1), loc='upper left')
         plt.show()
-
-    def show_tree(self, figsize, filled):
-        plt.figure(figsize=figsize)
-        feature_names = list(self.X_tr.columns)
-        sktree.plot_tree(self.Model,
-                         feature_names=feature_names,
-                         filled=filled)
-        plt.show()
-
-    def show_features(self):
-        importance = self.Model.feature_importances_
-        feature_importance = pd.Series(importance, index=self.X_tr.columns)
-        feature_importance.sort_values().plot(kind='bar')
-        plt.ylabel('Importance')
-        plt.show()
-
-    def pre_pruning_classified(self, grid):
-        classifier = sktree.DecisionTreeClassifier(random_state=1234)
-        gcv = GridSearchCV(estimator=classifier, param_grid=grid)
-        gcv.fit(self.X_tr, self.Y_tr)
-        pruned_model = gcv.best_estimator_
-        print(f"Best params: {pruned_model.fit(self.X_tr, self.Y_tr)}")
-        print(f"New model training score: {pruned_model.score(self.X_tr, self.Y_tr)}")
-        print(f"New model test score: {pruned_model.score(self.X_test, self.Y_test)}")
-
-    def pre_pruning_regression(self, regressor):
-        path = regressor.cost_complexity_pruning_path(self.X_tr, self.Y_tr)
-        ccp_alphas = path.ccp_alphas
-        ccp_alphas = ccp_alphas[:-1] #remove the 1-node tree from option
-        train_scores, test_scores = [], []
-        for alpha in ccp_alphas:
-            regressor_ = sktree.DecisionTreeRegressor(random_state=1234, ccp_alpha=alpha)
-            model_ = regressor_.fit(self.X_tr, self.Y_tr)
-            train_scores.append(model_.score(self.X_tr, self.Y_tr))
-            test_scores.append(model_.score(self.X_test,self.Y_test))
-        return ccp_alphas,train_scores,test_scores
 
     def dummy_values(self):
         self.X_test = pd.get_dummies(self.X_test)
