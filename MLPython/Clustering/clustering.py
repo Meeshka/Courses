@@ -138,3 +138,11 @@ if __name__ == "__main__":
         'Income': 'median',
         'SpendingScore': 'median'
     })}")
+
+    print(f"Cluster analysis:\n{customers.groupby('Cluster').agg({       
+        'Gender_Female': 'mean',
+        'Gender_Male': 'mean',
+        'Age': 'median',
+        'Income': 'median',
+        'SpendingScore': 'median'
+}).round(2)}")
